@@ -25,3 +25,21 @@ export interface IUser {
     createdAt?: string;
     updatedAt?: string; 
 }
+interface Author {
+    _id: string;
+    username: string;
+    profilePicture: string; // o `profilePicture?: string;` si es opcional
+}
+
+export interface IPost{
+    _id?: string;
+    caption?: string;
+    image?: string;
+    author?: Author;
+    likes?: string[];
+    comments?: string[];
+}
+
+export interface IPosts{
+    posts: IPost[]
+}

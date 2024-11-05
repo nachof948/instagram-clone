@@ -1,8 +1,11 @@
+import { useSelector } from 'react-redux'
 import { Post } from '../feed/Post'
+import { RootState } from '../../redux/store'
 const Posts: React.FC = () => {
+  const { posts } = useSelector((state: RootState) => state.posts)
   return (
     <div>
-      {[1,2,3,4].map((item, index) => <Post key={index}/>)}
+      {posts.map((post) => <Post key={post._id} post={post} />)}
     </div>
   )
 }

@@ -1,8 +1,9 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authSlice from "./authSlice";
-import { persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist";
+import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist";
 
 import storage from "redux-persist/lib/storage";
+import postSlice from "./postSlice";
 
 const persistConfig = {
   key: "root",
@@ -10,7 +11,7 @@ const persistConfig = {
   storage,
 };
 
-const rootReducer = combineReducers({auth:authSlice})
+const rootReducer = combineReducers({auth:authSlice, posts: postSlice})
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
@@ -23,8 +24,16 @@ const store = configureStore({
       },
     }),
 });
+const persistor = persistStore(store);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 export { store };
+
+//Llama al método purge() del persistor
+/* persistor.purge().then(() => {
+  console.log('Estado persistente restablecido');
+}).catch((error) => {
+  console.error('Error al restablecer el estado persistente:', error);
+});   */

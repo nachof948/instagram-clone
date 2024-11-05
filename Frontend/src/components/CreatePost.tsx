@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { FormEvent } from "react";
 import { Dialog, DialogContent, DialogHeader } from "./ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { useSelector } from "react-redux";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { readFileAsDataURL } from "../utils/readFileAsDataURL";
@@ -9,6 +10,9 @@ import { Loader2 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import * as api from '../api/index'
+import { RootState } from "../redux/store";
+import { addPost } from "../redux/postSlice";
+import { useDispatch } from "react-redux";
 
 
 interface CreatePostProps {
@@ -17,6 +21,8 @@ interface CreatePostProps {
 }
 
 const CreatePost: React.FC<CreatePostProps> = ({ open, setOpen }) => {
+  const dispatch = useDispatch()
+  const { user } = useSelector((state: RootState) => state.auth)
   const [file, setFile] = useState<File | null>()
   const [caption, setCaption] = useState<string>("")
   const [imagePreview, setImagePreview] = useState<string>("")
@@ -38,26 +44,28 @@ const CreatePost: React.FC<CreatePostProps> = ({ open, setOpen }) => {
     }
   }
 
-  const handleCreatePost = async (e: FormEvent) =>{
-    e.preventDefault()
+  const handleCreatePost = async (e: FormEvent) => {
+    e.preventDefault();
     const formData = new FormData();
-    formData.append("caption", caption)
-    if(file) formData.append("image", file)
+    formData.append("caption", caption);
+    if (file) formData.append("image", file);
     try {
-      setLoading(true);
-      const { data } = await api.addPost(formData)
-      if(data.success){
-        toast.success(data.message)
-        setOpen(false)
-      }
+        setLoading(true);
+        const { data } = await api.addPost(formData);
+        if (data.success) {
+            dispatch(addPost(data.post)); // Usa el nuevo reducer aquí
+            toast.success(data.message);
+            setOpen(false);
+        }
     } catch (error) {
-      if(axios.isAxiosError(error)){
-        toast.error(error.response?.data.message)
-      }
-    }finally{
-      setLoading(false)
+        if (axios.isAxiosError(error)) {
+            toast.error(error.response?.data.message);
+        }
+    } finally {
+        setLoading(false);
     }
-  }
+}
+
   
   useEffect(() =>{
     if(open === false){
@@ -72,11 +80,11 @@ const CreatePost: React.FC<CreatePostProps> = ({ open, setOpen }) => {
         <DialogHeader className="font-medium mx-auto">Crea una nueva publicación</DialogHeader>
         <div className="flex gap-3 items-center" onClick={handleCreatePost}>
           <Avatar>
-            <AvatarImage src="" alt="img"/>
+            <AvatarImage src={user?.profilePicture} alt="img"/>
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
           <div className="">
-            <h1 className="font-semibold text-xs">Nombre de Usuario</h1>
+            <h1 className="font-semibold text-xs">{user?.username}</h1>
             <span className="text-grey text-xs">Bio here...</span>
           </div>
         </div>
@@ -93,8 +101,8 @@ const CreatePost: React.FC<CreatePostProps> = ({ open, setOpen }) => {
         {
           imagePreview && (
             loading ? (
-              <Button>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin bg-hover-signup text-white"/>
+              <Button className="bg-hover-signup text-white">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin text-white"/>
                 Por favor aguarde
               </Button>
             ) : (

@@ -13,3 +13,5 @@ export const logout = () => API.post('/logout')
 
 /* POST */
 export const addPost = (formData: any) => API.post('/post/addpost', formData);
+export const getAllPost = () => API.get('/post/all');
+export const deletePost = (postId: string) => API.delete(`/post/delete/${postId}`);
